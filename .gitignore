@@ -13,3 +13,5 @@ workspace
 .settings
 .project
 .classpath
+*.ts
+*.m3u8
