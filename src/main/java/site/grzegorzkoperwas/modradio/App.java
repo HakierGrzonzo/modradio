@@ -7,20 +7,43 @@ import org.bytedeco.ffmpeg.avutil.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
+import java.io.EOFException;
 
-/**
- * Hello world!
- *
- */
 public class App 
 {
     public static void main( String[] args )
     {
         av_register_all();
-        System.out.println( "Hello World!" );
-        int error = 0;
-        AVFormatContext context = new AVFormatContext(null);
         String in_file = args[0];
+        Reader reader = new Reader(in_file);
+        Decoder decoder = new Decoder(reader);
+        Encoder encoder = new Encoder(
+                AV_CODEC_ID_AAC,
+                320 * 1024,
+                AV_SAMPLE_FMT_FLTP,
+                44100,
+                AV_CH_LAYOUT_STEREO);
+        Resampler resampler = new Resampler(
+                decoder.getContext(), 
+                encoder.getContext()
+        );
+        while (true) {
+            try {
+                AVFrame frame = decoder.getNextFrame();
+                AVFrame resampled = resampler.resampleFrame(frame);
+                encoder.feed(resampled);
+            } catch (EOFException e) {
+                break;
+            }
+            while (true) {
+                try {
+                    AVPacket packet = encoder.getPacket();
+                } catch (EOFException e) {
+                    break;
+                }
+            }
+        }
+        /*
         System.out.println(in_file);
         error = avformat_open_input(context, in_file, null, null);
         if (error < 0) {
@@ -83,5 +106,6 @@ public class App
                 throw new IllegalStateException();
             }
         }
+        */
     }
 }
