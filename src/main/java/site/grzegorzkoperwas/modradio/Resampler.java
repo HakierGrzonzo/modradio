@@ -10,7 +10,11 @@ public class Resampler
 {
     private SwrContext context;
     private AVFrame frame = av_frame_alloc();
+    private AVCodecContext input_context;
+    private AVCodecContext output_context;
     public Resampler(AVCodecContext input, AVCodecContext output) {
+        this.input_context = input;
+        this.output_context = output;
         context = swr_alloc();
         if (context.address() == 0) {
             throw new IllegalStateException("Failed to alloc swresample context");
@@ -35,5 +39,11 @@ public class Resampler
             throw new IllegalStateException("Failed to resample frame!");
         }
         return frame;
+    }
+    public String toString() {
+        return "<Resampler from " + 
+            input_context.sample_rate() + "hz " +
+            "to " +
+            output_context.sample_rate() + "hz>";
     }
 }

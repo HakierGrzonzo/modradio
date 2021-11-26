@@ -17,16 +17,20 @@ public class App
         String in_file = args[0];
         Reader reader = new Reader(in_file);
         Decoder decoder = new Decoder(reader);
+        System.out.println(reader);
+        System.out.println(decoder);
         Encoder encoder = new Encoder(
                 AV_CODEC_ID_AAC,
                 320 * 1024,
                 AV_SAMPLE_FMT_FLTP,
                 44100,
                 AV_CH_LAYOUT_STEREO);
+        System.out.println(encoder);
         Resampler resampler = new Resampler(
                 decoder.getContext(), 
                 encoder.getContext()
         );
+        System.out.println(resampler);
         while (true) {
             try {
                 AVFrame frame = decoder.getNextFrame();
