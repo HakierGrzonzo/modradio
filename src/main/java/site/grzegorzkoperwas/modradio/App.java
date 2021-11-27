@@ -40,6 +40,7 @@ public class App
             } catch (NoSuchElementException e) {
                 break;
             } catch (Exception e) {
+                System.out.println("Unable to open file: " + filePath);
                 file.delete();
                 continue;
             }
@@ -82,6 +83,7 @@ public class App
             cumulative_offset_pts += pts_offset;
             cumulative_offset_dts += dts_offset;
             cumulative_offset_pos += pos_offset;
+            System.out.println("done with file: " + filePath);
             file.delete();
         }
         muxer.close();
