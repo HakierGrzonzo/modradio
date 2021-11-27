@@ -30,6 +30,10 @@ public class App
                 decoder.getContext(), 
                 encoder.getContext()
         );
+        AVDictionary muxerOpts = new AVDictionary(null);
+        av_dict_set(muxerOpts, "hls_time", "10", 0);
+        av_dict_set(muxerOpts, "hls_playlist_type", "event", 0);
+        Muxer muxer = new Muxer("stream.m3u8", muxerOpts, encoder.getContext());
         System.out.println(resampler);
         while (true) {
             try {
@@ -42,11 +46,13 @@ public class App
             while (true) {
                 try {
                     AVPacket packet = encoder.getPacket();
+                    muxer.feed(packet);
                 } catch (EOFException e) {
                     break;
                 }
             }
         }
+        muxer.close();
         /*
         System.out.println(in_file);
         error = avformat_open_input(context, in_file, null, null);

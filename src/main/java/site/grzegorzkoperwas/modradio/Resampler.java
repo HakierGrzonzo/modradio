@@ -38,6 +38,7 @@ public class Resampler
         if (error < 0) {
             throw new IllegalStateException("Failed to resample frame!");
         }
+        frame.pts(input.pts());
         return frame;
     }
     public String toString() {

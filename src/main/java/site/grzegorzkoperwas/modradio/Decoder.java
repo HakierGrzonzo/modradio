@@ -14,8 +14,12 @@ public class Decoder
     private AVStream in_stream = null;
     private AVFrame frame = av_frame_alloc();
     private Reader reader;
+    private AVRational timeBase;
     public Decoder(Reader reader) {
         this.reader = reader;
+        this.timeBase = new AVRational();
+        this.timeBase.num(1);
+        this.timeBase.den(AV_TIME_BASE);
         in_stream = this.reader.getAudioStream();
         avcodec_parameters_to_context(context, in_stream.codecpar());
         codec = avcodec_find_decoder(context.codec_id());
@@ -38,6 +42,7 @@ public class Decoder
             throw new IllegalStateException("frame not allocated");
         }
         AVPacket packet = this.reader.getNextPacket();
+        av_packet_rescale_ts(packet, this.in_stream.time_base(), timeBase);
         avcodec_send_packet(context, packet);
         avcodec_receive_frame(context, frame);
         return frame;
