@@ -39,6 +39,9 @@ public class Resampler
             throw new IllegalStateException("Failed to resample frame!");
         }
         frame.pts(input.pts());
+        frame.pkt_duration(input.pkt_duration());
+        frame.pkt_dts(input.pkt_dts());
+        frame.pkt_pos(input.pkt_pos());
         return frame;
     }
     public String toString() {
