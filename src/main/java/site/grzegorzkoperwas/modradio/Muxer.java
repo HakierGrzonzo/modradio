@@ -51,7 +51,7 @@ class Muxer {
         long now_pts = input.pts();
         int error = av_interleaved_write_frame(this.context, input);
         if ((now_pts - prev_pts) / 100000 > 1) {
-            //System.out.println("Sleep!");
+            System.out.println("Sleep!");
             prev_pts = now_pts;
             try {
                 Thread.sleep(2000);

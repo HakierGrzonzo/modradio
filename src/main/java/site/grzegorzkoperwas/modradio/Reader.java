@@ -2,11 +2,10 @@ package site.grzegorzkoperwas.modradio;
 import org.bytedeco.javacpp.*;
 import org.bytedeco.ffmpeg.avformat.*;
 import org.bytedeco.ffmpeg.avcodec.*;
-import org.bytedeco.ffmpeg.avutil.*;
 import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
-import java.io.EOFException;
+import java.io.*;
 
 public class Reader
 {
@@ -71,5 +70,14 @@ public class Reader
                 throw new EOFException();
             }
         }
+    }
+
+    public String getPath() {
+        return this.path;
+    }
+
+    public void deleteFile() {
+        File file = new File(this.path);
+        file.delete();
     }
 }

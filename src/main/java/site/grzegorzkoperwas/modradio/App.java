@@ -1,22 +1,20 @@
 package site.grzegorzkoperwas.modradio;
 
-import org.bytedeco.javacpp.*;
-import org.bytedeco.ffmpeg.avformat.*;
 import org.bytedeco.ffmpeg.avcodec.*;
 import org.bytedeco.ffmpeg.avutil.*;
-import static org.bytedeco.ffmpeg.global.avformat.*;
 import static org.bytedeco.ffmpeg.global.avcodec.*;
 import static org.bytedeco.ffmpeg.global.avutil.*;
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.*;
 
 public class App 
 {
     public static void main( String[] args )
     {
-        //av_register_all();
-        //String in_file = args[0];
         Scanner stdin = new Scanner(System.in);
+        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+        Future<Reader> nextReader = executor.submit(new ReaderAsyncFactory(stdin));
         Encoder encoder = new Encoder(
                 AV_CODEC_ID_AAC,
                 320 * 1024,
@@ -33,18 +31,13 @@ public class App
         long cumulative_offset_pos = 0;
         while (true) {
             Reader reader = null;
-            String filePath = stdin.nextLine();
-            File file = new File(filePath);
             try {
-                reader = new Reader(filePath);
-            } catch (NoSuchElementException e) {
-                break;
+                reader = nextReader.get();
             } catch (Exception e) {
-                System.out.println("Unable to open file: " + filePath);
-                file.delete();
-                continue;
+                System.out.println(e);
+                break;
             }
-            System.out.println(reader);
+            nextReader = executor.submit(new ReaderAsyncFactory(stdin));
             Decoder decoder = new Decoder(reader);
             System.out.println(decoder);
             Resampler resampler = new Resampler(
@@ -83,10 +76,11 @@ public class App
             cumulative_offset_pts += pts_offset;
             cumulative_offset_dts += dts_offset;
             cumulative_offset_pos += pos_offset;
-            System.out.println("done with file: " + filePath);
-            file.delete();
+            System.out.println("done with file: " + reader.getPath());
+            reader.deleteFile();
         }
         muxer.close();
         stdin.close();
+        executor.shutdown();
     }
 }
