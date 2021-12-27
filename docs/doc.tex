@@ -1,0 +1,311 @@
+% !TEX program = xelatex
+%Wzór dokumentu
+%tu zmień marginesy i rozmiar czcionki
+\documentclass[a4paper,12pt]{article}
+\usepackage{inputenc}[utf8]
+\usepackage[margin=2.8cm]{geometry}
+\usepackage[polish]{babel}
+
+%Lepiej tego nie zmieniaj, jak co to dodawaj pakiety
+\usepackage{titlesec}
+\usepackage{titling}
+\usepackage{fancyhdr}
+\usepackage{mdframed}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{multicol}
+\usepackage{multirow}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{float}
+\usepackage{pdfpages}
+\usepackage{tikz}
+	\usetikzlibrary{arrows}
+	\usetikzlibrary{patterns}
+	\usetikzlibrary{decorations.pathmorphing}
+\usepackage{pgf}
+\usepackage[section]{placeins}
+\usepackage{caption}
+
+
+
+%inny wygląd
+%\usepackage{tgbonum}
+
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\urlstyle{same}
+%Zmienne, zmień je!
+\graphicspath{ {./ilustracje/} }
+\title{MODradio}
+\author{Grzegorz Koperwas}
+\date{\today}
+
+%lokalizacja polska (odkomentuj jak piszesz po polsku)
+
+\usepackage{polski}
+\usepackage[polish]{babel} 
+\usepackage{indentfirst}
+\usepackage{icomma} 
+\captionsetup[figure]{name=Załącznik}
+\brokenpenalty=1000
+\clubpenalty=1000
+\widowpenalty=1000    
+
+%nie odkometowuj wszystkiego, użyj mózgu
+%\renewcommand\thechapter{\arabic{chapter}.}
+\renewcommand\thesection{\arabic{section}.}
+\renewcommand\thesubsection{\arabic{section}.\arabic{subsection}.}
+\renewcommand\thesubsubsection{\arabic{subsubsection}.}
+
+%Makra
+
+\newcommand{\obrazek}[2]{
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=#1]{#2}
+\end{figure}
+}     
+
+\newcommand{\stopnie}{\ensuremath{^{\circ}}}
+
+\newcommand{\twierdzonko}[1]{
+    \begin{center}
+    \begin{mdframed}
+    #1
+    \end{mdframed}          
+    \end{center}
+} 
+
+\newcommand{\dwanajeden}[2]{
+\ensuremath \left( \begin{array}{c}
+    #1\\
+    #2
+\end{array} \right)
+}  
+
+%Stopka i head (sekcja której nie powinno się zmieniać)
+\pagestyle{fancy}
+\fancyhead{}
+\fancyfoot{}
+
+%Zmieniaj od tego miejsca
+\rfoot{\thepage}
+\lfoot{}
+\lhead{}
+\rhead{Ostatnia edycja: \today}
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+
+
+
+\begin{document}
+
+\maketitle
+
+\section{Temat projektu:}
+
+Celem powstałego programu jest strumieniowanie piosenek z \texttt{trackerów}
+poprzez \emph{Http Live Streaming\footnote{Dalej będę korzystał z skrótu
+\textbf{HLS}}} w celu łatwego odsłuchu na urządzeniach
+mobilnych.
+
+Zatem musi on dynamicznie łączyć kolejne pliki w jeden strumień, bez
+wcześniejszego wczytania ich wszystkich (Ilość tych plików wynosi 29 tysięcy,
+rozmiar około 50 gigabajtów w formie skompresowanej).
+
+\subsection*{Opis problemu:}
+
+Archiwa strony \texttt{modarchive.org} są udostępniane w następującej formie:
+
+\begin{enumerate}
+        \item Piosenki znajdują się w drzewie folderów rozróżniającym je ze
+            względu na format, artystę czy rok dodania. 
+
+            Jakiekolwiek informacje zawarte w strukturze folderów mają być
+            ignorowane, strumieniujemy piosenki w losowy sposób.
+
+            Odtwarzacz VLC
+            może uzyskiwać dostęp po protokole SMB do serwera z plikami, lecz
+            nie odtwarza ich losowo w prosty sposób.
+
+        \item Każda piosenka jest skompresowana jako archiwum \texttt{ZIP}.
+
+        \item Piosenki są przechowywane jako \emph{moduły trackerów}, gdzie
+            zamiast danych \texttt{PCM} przechowywane są w formie sampli i
+            informacji jak je odtwarzać. Wynika to z architektury komputerów
+            \emph{Amiga}, gdzie ten rodzaj muzyki powstał.
+\end{enumerate}
+
+Zatem program musi:
+
+\begin{enumerate}
+        \item Przyjmować pliki audio w formie pozwalającej na utrzymywanie
+            \emph{bufora} następnych plików audio.
+        \item Przyjmować pliki, lub ścieżki do nich z źródła łatwo dostępnego 
+            dla jakiegoś skryptu. Na przykład przez \texttt{stdin}.
+        \item Spełniać wymagania do łatwego zahostowania na moim klastrze
+            \emph{Docker Swarm}, brak GUI itp.
+\end{enumerate}
+
+\section{Opis pobieranych danych przez program:}
+
+Program pobiera przez standardowe wejście ścieżki do kolejnych plików audio.
+Pliki te są \textbf{usuwane} po zakończeniu ich strumieniowania.
+
+Program po napotkaniu pliku którego nie da się otworzyć lub zdekodować pomija
+dany plik. 
+
+Program stara się otwierać dwa pliki na raz. Plik, który jest właśnie
+strumieniowany, oraz plik który jest następny w kolejce.
+
+\section{Opis otrzymanych rezultatów}
+
+\subsection*{Wydruk z programu}
+
+Program wypisuje do konsoli logi diagnostyczne, za przechowywanie ich w plikach
+odpowiada \textbf{systemd} lub \textbf{docker}.
+
+Logi w omawianym przykładzie składają się z paru części:
+
+\begin{itemize}
+        \item Logi z znakami < oraz >, - Logi informujące jakie obiekty są
+            tworzone przez program. Przykładowo:
+            \begin{itemize}
+                \item \texttt{<Encoder for aac>} - Stworzono obiekt kodera
+                    formatu \texttt{AAC}, zawsze wyświetla się na początku
+                    programu.
+                \item \texttt{<Reader for /path/to/file>} - Stworzono obiekt
+                    demuxera, który czyta zawartość pliku. Jeżeli dany plik
+                    zawiera parę strumieni wideo lub audio, program wybiera
+                    pierwszy strumień audio. Powinien wspierać większość
+                    standardów (pewnie nawet zasoby sieciowe, zależy od wersji
+                    biblioteki \texttt{libav}).
+                \item \texttt{<Decoder for \$codec>} - Stworzono obiekt dekodera
+                    kompresji, program \emph{powinien} wspierać wiele różnych
+                    kodeków, jednak standard mp3 generuje nie poprawny dźwięk.
+                \item \texttt{<Resampler from \$foo to \$bar>} - Stworzono
+                    obiekt resamplera, który normalizuje częstotliwość
+                    próbkowania oraz zapis bitowy.
+            \end{itemize}
+        \item Logi z znakami [ oraz ]\footnote{te kolorowe}, - Logi generowane przez bibliotekę
+            \texttt{libav} - są zwykle w formie:
+
+            \begin{center}
+                [ \$źródło @ adres źródła ] \$wiadomość
+            \end{center}
+            
+            Zwykle są to logi o statusie muxera \texttt{HLS}, lecz w przypadku
+            złego pliku wejściowego zawierają one dodatkowe informacje o
+            błędzie. Program \texttt{ffmpeg}, który jest frontendem do
+            biblioteki \texttt{libav} generuje te same logi, więc jego
+            dokumentacja pomoże w diagnozowaniu problemu.
+
+        \item Reszta:
+
+            Część logów w przykładzie pochodzi od skryptu realizującego
+            przykładowe wykorzystanie programu. Jest on dołączony do kodu jako
+            \texttt{./feeder.sh}.
+\end{itemize}
+
+Przykładowe logi znajdują się na załączniku \ref{lst:logs}.
+
+\begin{figure}[h]
+\begin{lstlisting}[frame=LB,basicstyle=\ttfamily\scriptsize, numbers=left]
+[mpegts @ 0x7f0600355480] frame size not set
+<Encoder for aac>
+extracted /tmp/modfiles/lazertrack_heaven_2.mod
+[aac @ 0x7f05f4005240] Estimating duration from bitrate, this may be inaccurate
+<Reader for /tmp/modfiles/lazertrack_heaven_2.mod.aac>
+<Decoder for aac>
+<Resampler from 44100hz to 44100hz>
+[hls @ 0x7f060034de00] Opening 'stream0.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+extracted /tmp/modfiles/the_hardliner_-_whoronzon_gohonzon.xm
+[aac @ 0x7f05ec001100] Estimating duration from bitrate, this may be inaccurate
+<Reader for /tmp/modfiles/the_hardliner_-_whoronzon_gohonzon.xm.aac>
+extracted /tmp/modfiles/the_savannus_never_never.669
+[hls @ 0x7f060034de00] Opening 'stream1.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x7f060034de00] Opening 'stream2.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+extracted /tmp/modfiles/gustavo6046_-_trulix.it
+extracted /tmp/modfiles/jabdah-cover.xm
+extracted /tmp/modfiles/jason_ee-futurefuckballs2010_cover.it
+extracted /tmp/modfiles/owcfullfrontal.it
+[hls @ 0x7f060034de00] Opening 'stream3.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+extracted /tmp/modfiles/skyline_-_boners.it
+extracted /tmp/modfiles/ko0x_-_galaxy_guppy.it
+[hls @ 0x7f060034de00] Opening 'stream4.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+extracted /tmp/modfiles/pasyada_alex_-_decil.xm
+extracted /tmp/modfiles/badboyremixhypnosis.mod
+[hls @ 0x7f060034de00] Opening 'stream5.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+Waiting for modradio to pickup data
+[hls @ 0x7f060034de00] Opening 'stream6.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+[hls @ 0x7f060034de00] Opening 'stream7.ts' for writing
+[hls @ 0x7f060034de00] Opening 'stream.m3u8.tmp' for writing
+...
+\end{lstlisting}
+\centering
+    \caption{Przykładowe logi z programu.}
+    \label{lst:logs}
+\end{figure}
+
+\subsection*{Pliki tworzone przez program:}
+
+Program tworzy w aktualnym katalogu strumień w formacie \texttt{HLS} jako pliki
+\texttt{stream\$x.ts} oraz plik ,,spis'' \texttt{stream.m3u8}. Te pliki powinny
+być hostowane przez serwer HTTP, jako pliki statyczne. Programy takie jak
+\emph{VLC Media Player}, \emph{ffplay}, \emph{safari} czy przeglądarki
+internetowe na systemie android odtworzą je bez problemu, nawet z dysku. Dla
+przeglądarek na komputerach PC trzeba dostarczyć demuxer w
+\emph{javascript'cie}, co nie jest przedmiotem tego projektu.
+
+
+\section{Zastosowane algorytmy:}
+
+Obieg danych jest przedstawiony na załączniku \ref{rys:pipeline}.
+
+W programie został zastosowany mechanizm asynchroniczności poprzez klasę
+standardową \texttt{Future} oraz \texttt{ReaderAsyncFactory}.
+
+\begin{figure}
+    \resizebox{.3\textwidth}{!}{%
+        \input{pipeline.tex}%
+    }
+    \centering
+    \caption{Pipeline danych}
+    \label{rys:pipeline}
+\end{figure}
+
+\section{Testy na poprawność działania programu:}
+
+Poprawność działania była sprawdzana poprzez odsłuch strumieni generowanych
+przez program oraz hostowanie ich serwerem \texttt{http} z biblioteki
+standardowej języka \emph{Python}, poprzez komendę \texttt{python -m
+http.server}.
+
+\section{Wnioski:}
+
+Po stworzeniu tego programu lepiej rozumiem architekturę biblioteki
+\texttt{libav}, gdyż wcześniej wykorzystywałem ją tylko do dekodowania audio w
+poprzednim projekcie z
+\href{https://github.com/HakierGrzonzo/GrzesSFMLlib}{programowania II.} w języku
+C++ oraz w projekcie komercyjnym dla Gliwickiej firmy \emph{APA
+Group\footnote{Plakat rekrutacyjny ,,Pracuj w Czarnym Domu'' wisi na czwartym
+piętrze wydziału Matematyki Stosowanej obok schodów.}} w języku
+python.
+
+\end{document}
