@@ -1,0 +1,108 @@
+digraph G {
+    main [
+        label="main()"
+    ]
+    encoder_init [
+        label="Inicjalizacja kodera AAC"
+        shape=hexagon
+    ]
+        main -> encoder_init
+    muxer_init [
+        label="Inicjalizacja Muxera i przesłanie opcji"
+        shape=hexagon
+    ]
+        encoder_init -> muxer_init
+    init_offsets [
+        label="Ustaw kumulatywne offset pts, dts i pos na 0"
+        shape=rect
+    ]
+        muxer_init -> init_offsets;
+    try_get_reader [
+        label="Pobierz Reader z ReaderAsyncFactory"
+        shape=hexagon
+    ]
+        init_offsets -> try_get_reader
+    init_decoder [
+        label="Inicjalizacja dekodera dla obiektu reader"
+        shape=hexagon
+    ]
+        try_get_reader -> init_decoder [label="sukces"]
+    init_resampler [
+        label="Inicjalizacja resamplera dla obiektu dekodera"
+        shape=hexagon
+    ]
+        init_decoder -> init_resampler;
+    init_offset_local [
+        label="Ustaw offsety lokalne pts, dts i pos na 0"
+        shape=rect
+    ]
+        init_resampler -> init_offset_local;
+    handle_eof [
+        label="Spróbuj do EnfOfFileException"
+        shape=diamond
+    ]
+        init_offset_local -> handle_eof
+    get_frame [
+        label="Pobierz nową klatkę do zmiennej frame z dekodera"
+        shape=hexagon
+    ]
+        handle_eof -> get_frame[label="Nie EOF"]
+    resample [
+        label ="Resampluj frame resamplerem i zapisz ją w resampled"
+        shape=hexagon
+    ]
+        get_frame -> resample
+    get_offsets [
+        label="Spisz pts, dts i pos z resampled do zmiennych offset_*"
+        shape=rect
+    ]
+        resample -> get_offsets
+    set_offsets [
+        label="Dodaj do pts, dts i pos w resampled offsety kumulatywne"
+        shape=rect
+    ]
+        get_offsets -> set_offsets
+    push_encoder [
+        label="Prześlij resampled do kodera"
+        shape=hexagon
+    ]
+        set_offsets -> push_encoder;
+    handle_eof_packet [
+        label="Spróbuj do EnfOfFileException"
+        shape=diamond
+    ]
+        push_encoder -> handle_eof_packet;
+        read_packet [
+            label="Odczytaj pakiet z kodera"
+            shape=hexagon
+        ]
+            handle_eof_packet -> read_packet [label="sukces"]
+        push_muxer [
+            label="Prześlij pakiet do muxera"
+            shape=hexagon
+        ]
+            read_packet -> push_muxer;
+            push_muxer -> handle_eof_packet;
+            handle_eof_packet -> handle_eof [label="EndOfFileException"]
+    add_to_cumulative [
+        label="Dodaj do kumulatywnych offsetów pts, dts i pos offsety lokalne"
+    ]
+        handle_eof -> add_to_cumulative [label="EndOfFileException"]
+    delete_file [
+        label="Usuń plik przetwarzany"
+        shape=hexagon
+    ]
+        add_to_cumulative -> delete_file;
+        delete_file -> try_get_reader;
+    close_muxer [
+        label="Zamknij Muxer"
+        shape=hexagon
+    ] 
+        try_get_reader -> close_muxer [label="Koniec stdin"]
+    end [
+        label="Koniec programu"
+    ]
+    close_muxer -> end;
+
+
+}

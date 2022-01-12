@@ -1,0 +1,34 @@
+digraph G {
+    reader_1 [
+        label="call()"
+    ]
+    reader_2 [
+        label="Ustaw zmienną reader na null"
+        shape=rect
+    ]
+    reader_1 -> reader_2;
+    reader_3 [
+        label="reader == null"
+        shape=diamond
+    ]
+    reader_2 -> reader_3;
+    reader_4 [
+        label="Spróbuj zczytać linjkę z stdin do zmiennej filepath"
+        shape=hexagon
+    ]
+    exception [
+        label="Zwróć wyjątek"
+    ]
+    reader_4 -> exception [label="Koniec stdin"]
+    reader_3 -> reader_4 [label="true"]
+    reader_5 [
+        label="Spróbuj odczytać plik w ścierzce filepath"
+        shape=hexagon
+    ]
+    reader_4 -> reader_5;
+    reader_5 -> reader_3;
+    reader_6 [
+        label="Zwróć reader"
+    ]
+    reader_3 -> reader_6 [label="false"]
+}

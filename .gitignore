@@ -16,3 +16,9 @@ workspace
 *.ts
 *.m3u8
 tests/
+*.aux
+*.log
+*.out
+docs/program.tex
+docs/pipeline.tex
+docs/reader.tex

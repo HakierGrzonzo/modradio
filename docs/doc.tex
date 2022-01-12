@@ -20,11 +20,10 @@
 \usepackage{caption}
 \usepackage{float}
 \usepackage{pdfpages}
+\usepackage[x11names, svgnames, rgb]{xcolor}
 \usepackage{tikz}
-	\usetikzlibrary{arrows}
-	\usetikzlibrary{patterns}
-	\usetikzlibrary{decorations.pathmorphing}
-\usepackage{pgf}
+\usetikzlibrary{snakes,arrows,shapes}
+\usepackage{amsmath}
 \usepackage[section]{placeins}
 \usepackage{caption}
 
@@ -281,13 +280,31 @@ Obieg danych jest przedstawiony na załączniku \ref{rys:pipeline}.
 W programie został zastosowany mechanizm asynchroniczności poprzez klasę
 standardową \texttt{Future} oraz \texttt{ReaderAsyncFactory}.
 
-\begin{figure}
+\begin{figure}[p]
     \resizebox{.3\textwidth}{!}{%
         \input{pipeline.tex}%
     }
     \centering
     \caption{Pipeline danych}
     \label{rys:pipeline}
+\end{figure}
+
+\begin{figure}[p]
+    \resizebox{.7\textwidth}{!}{%
+        \input{reader.tex}%
+    }
+    \centering
+    \caption{Schemat blokowy działania klasy \texttt{ReaderAsyncFactory}}
+    \label{rys:reader}
+\end{figure}
+
+\begin{figure}[p]
+    \resizebox{.8\textwidth}{!}{%
+        \input{program.tex}%
+    }
+    \centering
+    \caption{Ogólny schemat działania programu.}
+    \label{rys:program}
 \end{figure}
 
 \section{Testy na poprawność działania programu:}
