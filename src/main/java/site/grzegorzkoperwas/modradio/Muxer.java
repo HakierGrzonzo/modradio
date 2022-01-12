@@ -51,11 +51,11 @@ class Muxer {
         long now_pts = input.pts();
         int error = av_interleaved_write_frame(this.context, input);
         if ((now_pts - prev_pts) / 100000 > 1) {
-            System.out.println("Sleep!");
-            prev_pts = now_pts;
+            //System.out.println(now_pts - prev_pts);
             try {
-                Thread.sleep(2000);
+                Thread.sleep((now_pts - prev_pts) / 100);
             } catch (Exception e) {}
+            prev_pts = now_pts;
         }
         if (error < 0) {
             throw new IllegalStateException("Failed to write frame!");
