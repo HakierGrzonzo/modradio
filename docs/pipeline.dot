@@ -1,0 +1,15 @@
+digraph G {
+    ReaderAsyncFactory;
+    Reader;
+    Decoder;
+    Resampler;
+    Encoder;
+    Muxer;
+
+    stdin -> ReaderAsyncFactory;
+    ReaderAsyncFactory -> Reader[label="Nazwa\npliku"];
+    Reader -> Decoder[label="Skompresowany\nstrumień"]
+    Decoder -> Resampler[label="Dane PCM"]
+    Resampler -> Encoder[label="Dane PCM"]
+    Encoder -> Muxer[label="Skompresowany\nstrumień"]
+}
