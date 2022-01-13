@@ -1,35 +1,41 @@
 digraph G {
+    node    [
+        lblstyle="text width=8em,align=center"
+        margin=".4,.1"
+    ]
     main [
-        label="main()"
+        texlbl="\texttt{main()}"
     ]
     encoder_init [
         label="Inicjalizacja kodera AAC"
-        shape=hexagon
+        shape=parallelogram
     ]
         main -> encoder_init
     muxer_init [
         label="Inicjalizacja Muxera i przesłanie opcji"
-        shape=hexagon
+        shape=parallelogram
     ]
         encoder_init -> muxer_init
     init_offsets [
-        label="Ustaw kumulatywne offset pts, dts i pos na 0"
+        label="Ustaw kumulatywne offsetów pts, dts i pos na 0"
         shape=rect
     ]
         muxer_init -> init_offsets;
     try_get_reader [
-        label="Pobierz Reader z ReaderAsyncFactory"
-        shape=hexagon
+        label="Czy \texttt{ReaderAsyncFactory} ma nowy \texttt{Reader}?"
+        lblstyle="text width=14em,align=center"
+        margin=".4,.3"
+        shape=diamond
     ]
         init_offsets -> try_get_reader
     init_decoder [
-        label="Inicjalizacja dekodera dla obiektu reader"
-        shape=hexagon
+        label="Inicjalizacja dekodera dla obiektu \texttt{reader}"
+        shape=parallelogram
     ]
-        try_get_reader -> init_decoder [label="sukces"]
+        try_get_reader -> init_decoder [label="tak"]
     init_resampler [
         label="Inicjalizacja resamplera dla obiektu dekodera"
-        shape=hexagon
+        shape=parallelogram
     ]
         init_decoder -> init_resampler;
     init_offset_local [
@@ -38,22 +44,24 @@ digraph G {
     ]
         init_resampler -> init_offset_local;
     handle_eof [
-        label="Spróbuj do EnfOfFileException"
+        texlbl="Koniec pliku?"
+        lblstyle="text width=14em,align=center"
+        margin=".4,.3"
         shape=diamond
     ]
         init_offset_local -> handle_eof
     get_frame [
-        label="Pobierz nową klatkę do zmiennej frame z dekodera"
-        shape=hexagon
+        label="Pobierz nową klatkę do zmiennej \texttt{frame} z dekodera"
+        shape=parallelogram
     ]
-        handle_eof -> get_frame[label="Nie EOF"]
+        handle_eof -> get_frame[label="Nie"]
     resample [
-        label ="Resampluj frame resamplerem i zapisz ją w resampled"
-        shape=hexagon
+        label ="Resampluj \texttt{frame} resamplerem i zapisz ją w \texttt{resampled}"
+        shape=parallelogram
     ]
         get_frame -> resample
     get_offsets [
-        label="Spisz pts, dts i pos z resampled do zmiennych offset_*"
+        label="Spisz pts, dts i pos z resampled do zmiennych offset\_*"
         shape=rect
     ]
         resample -> get_offsets
@@ -63,42 +71,44 @@ digraph G {
     ]
         get_offsets -> set_offsets
     push_encoder [
-        label="Prześlij resampled do kodera"
-        shape=hexagon
+        label="Prześlij \texttt{resampled} do kodera"
+        shape=parallelogram
     ]
         set_offsets -> push_encoder;
     handle_eof_packet [
-        label="Spróbuj do EnfOfFileException"
+        texlbl="Koniec nowych danych z kodera?"
+        lblstyle="text width=14em,align=center"
+        margin=".4,.3"
         shape=diamond
     ]
         push_encoder -> handle_eof_packet;
         read_packet [
             label="Odczytaj pakiet z kodera"
-            shape=hexagon
+            shape=parallelogram
         ]
-            handle_eof_packet -> read_packet [label="sukces"]
+            handle_eof_packet -> read_packet [label="Nie"]
         push_muxer [
             label="Prześlij pakiet do muxera"
-            shape=hexagon
+            shape=parallelogram
         ]
             read_packet -> push_muxer;
             push_muxer -> handle_eof_packet;
-            handle_eof_packet -> handle_eof [label="EndOfFileException"]
+            handle_eof_packet -> handle_eof [label="Koniec danych"]
     add_to_cumulative [
         label="Dodaj do kumulatywnych offsetów pts, dts i pos offsety lokalne"
     ]
-        handle_eof -> add_to_cumulative [label="EndOfFileException"]
+        handle_eof -> add_to_cumulative [label="Tak"]
     delete_file [
         label="Usuń plik przetwarzany"
-        shape=hexagon
+        shape=parallelogram
     ]
         add_to_cumulative -> delete_file;
         delete_file -> try_get_reader;
     close_muxer [
         label="Zamknij Muxer"
-        shape=hexagon
+        shape=parallelogram
     ] 
-        try_get_reader -> close_muxer [label="Koniec stdin"]
+        try_get_reader -> close_muxer [label="Nie"]
     end [
         label="Koniec programu"
     ]

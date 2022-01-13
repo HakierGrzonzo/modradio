@@ -23,12 +23,8 @@
 \usepackage[x11names, svgnames, rgb]{xcolor}
 \usepackage{tikz}
 \usetikzlibrary{snakes,arrows,shapes}
-\usepackage{amsmath}
 \usepackage[section]{placeins}
 \usepackage{caption}
-
-
-
 %inny wygląd
 %\usepackage{tgbonum}
 
@@ -113,7 +109,7 @@
 \section{Temat projektu:}
 
 Celem powstałego programu jest strumieniowanie piosenek z \texttt{trackerów}
-poprzez \emph{Http Live Streaming\footnote{Dalej będę korzystał z skrótu
+poprzez \emph{Http Live Streaming\footnote{Dalej będę korzystał ze skrótu
 \textbf{HLS}}} w celu łatwego odsłuchu na urządzeniach
 mobilnych.
 
@@ -149,7 +145,7 @@ Zatem program musi:
 \begin{enumerate}
         \item Przyjmować pliki audio w formie pozwalającej na utrzymywanie
             \emph{bufora} następnych plików audio.
-        \item Przyjmować pliki, lub ścieżki do nich z źródła łatwo dostępnego 
+        \item Przyjmować pliki, lub ścieżki do nich ze źródła łatwo dostępnego 
             dla jakiegoś skryptu. Na przykład przez \texttt{stdin}.
         \item Spełniać wymagania do łatwego zahostowania na moim klastrze
             \emph{Docker Swarm}, brak GUI itp.
@@ -160,11 +156,11 @@ Zatem program musi:
 Program pobiera przez standardowe wejście ścieżki do kolejnych plików audio.
 Pliki te są \textbf{usuwane} po zakończeniu ich strumieniowania.
 
-Program po napotkaniu pliku którego nie da się otworzyć lub zdekodować pomija
+Program po napotkaniu pliku, którego nie da się otworzyć lub zdekodować pomija
 dany plik. 
 
-Program stara się otwierać dwa pliki na raz. Plik, który jest właśnie
-strumieniowany, oraz plik który jest następny w kolejce.
+Program stara się otwierać dwa pliki naraz. Plik, który jest właśnie
+strumieniowany, oraz plik, który jest następny w kolejce.
 
 \section{Opis otrzymanych rezultatów}
 
@@ -176,7 +172,7 @@ odpowiada \textbf{systemd} lub \textbf{docker}.
 Logi w omawianym przykładzie składają się z paru części:
 
 \begin{itemize}
-        \item Logi z znakami < oraz >, - Logi informujące jakie obiekty są
+        \item Logi ze znakami < oraz >, - Logi informujące jakie obiekty są
             tworzone przez program. Przykładowo:
             \begin{itemize}
                 \item \texttt{<Encoder for aac>} - Stworzono obiekt kodera
@@ -190,7 +186,7 @@ Logi w omawianym przykładzie składają się z paru części:
                     biblioteki \texttt{libav}).
                 \item \texttt{<Decoder for \$codec>} - Stworzono obiekt dekodera
                     kompresji, program \emph{powinien} wspierać wiele różnych
-                    kodeków, jednak standard mp3 generuje nie poprawny dźwięk.
+                    kodeków, jednak standard mp3 generuje niepoprawny dźwięk.
                 \item \texttt{<Resampler from \$foo to \$bar>} - Stworzono
                     obiekt resamplera, który normalizuje częstotliwość
                     próbkowania oraz zapis bitowy.
@@ -299,7 +295,7 @@ standardową \texttt{Future} oraz \texttt{ReaderAsyncFactory}.
 \end{figure}
 
 \begin{figure}[p]
-    \resizebox{.8\textwidth}{!}{%
+    \resizebox{.54\textwidth}{!}{%
         \input{program.tex}%
     }
     \centering

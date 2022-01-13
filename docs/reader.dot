@@ -1,34 +1,38 @@
 digraph G {
-    reader_1 [
-        label="call()"
+    node    [
+        lblstyle="text width=8em,align=center"
+        margin=".4,.2"
     ]
-    reader_2 [
-        label="Ustaw zmienną reader na null"
+    reader1 [
+        texlbl="\texttt{call()}"
+    ]
+    reader2 [
+        texlbl="Ustaw zmienną \texttt{reader} na \texttt{null}"
         shape=rect
     ]
-    reader_1 -> reader_2;
-    reader_3 [
-        label="reader == null"
+    reader1 -> reader2;
+    reader3 [
+        texlbl="\texttt{reader == null}"
         shape=diamond
     ]
-    reader_2 -> reader_3;
-    reader_4 [
-        label="Spróbuj zczytać linjkę z stdin do zmiennej filepath"
-        shape=hexagon
+    reader2 -> reader3;
+    reader4 [
+        texlbl="Spróbuj zczytać linjkę z stdin do zmiennej \texttt{filepath}"
+        shape=parallelogram
     ]
     exception [
-        label="Zwróć wyjątek"
+        texlbl="Zwróć wyjątek"
     ]
-    reader_4 -> exception [label="Koniec stdin"]
-    reader_3 -> reader_4 [label="true"]
-    reader_5 [
-        label="Spróbuj odczytać plik w ścierzce filepath"
-        shape=hexagon
+    reader4 -> exception [texlbl="Koniec stdin"]
+    reader3 -> reader4 [texlbl="true"]
+    reader5 [
+        texlbl="Spróbuj odczytać plik w ścieżce \texttt{filepath}"
+        shape=parallelogram
     ]
-    reader_4 -> reader_5;
-    reader_5 -> reader_3;
-    reader_6 [
-        label="Zwróć reader"
+    reader4 -> reader5;
+    reader5 -> reader3;
+    reader6 [
+        texlbl="Zwróć \texttt{reader}"
     ]
-    reader_3 -> reader_6 [label="false"]
+    reader3 -> reader6 [texlbl="false"]
 }
