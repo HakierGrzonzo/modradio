@@ -1,10 +1,10 @@
 Phony: clean docs
 
-%.tex: %.dot
+%.dot.tex: %.dot
 	dot2tex --autosize --figonly --texmode raw $< > $@
 
-docs: docs/doc.tex docs/pipeline.tex docs/program.tex docs/reader.tex
+docs/doc.pdf: docs/doc.tex docs/pipeline.dot.tex docs/program.dot.tex docs/reader.dot.tex
 	cd docs; xelatex -shell-escape doc.tex && xelatex -shell-escape doc.tex
 
 clean:
-	rm *.m3u8 *.ts docs/program.tex docs/pipeline.tex docs/reader.tex
+	rm *.m3u8 *.ts docs/*.dot.tex 

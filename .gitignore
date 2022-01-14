@@ -19,6 +19,4 @@ tests/
 *.aux
 *.log
 *.out
-docs/program.tex
-docs/pipeline.tex
-docs/reader.tex
+*.dot.tex

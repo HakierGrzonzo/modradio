@@ -40,7 +40,7 @@
 \urlstyle{same}
 %Zmienne, zmień je!
 \graphicspath{ {./ilustracje/} }
-\title{MODradio}
+\title{MODradio - dokumentacja projektu}
 \author{Grzegorz Koperwas}
 \date{\today}
 
@@ -62,6 +62,32 @@
 \renewcommand\thesubsubsection{\arabic{subsubsection}.}
 
 %Makra
+
+\renewcommand{\maketitle}{
+    \begin{titlepage}
+        \vspace*{4cm}
+
+        \Large{\textbf{\thetitle}}
+
+        \vspace*{1cm}
+
+        \large{\theauthor}
+
+        \vfill
+    
+        \begin{center}
+            \footnotesize 
+            Politechnika Śląska 
+            
+            \vspace*{1em}
+
+            \today, Gliwice
+        \end{center}
+            
+        \vspace*{1cm}
+        
+    \end{titlepage}
+}
 
 \newcommand{\obrazek}[2]{
 \begin{figure}[h]
@@ -113,9 +139,9 @@ poprzez \emph{Http Live Streaming\footnote{Dalej będę korzystał ze skrótu
 \textbf{HLS}}} w celu łatwego odsłuchu na urządzeniach
 mobilnych.
 
-Zatem musi on dynamicznie łączyć kolejne pliki w jeden strumień, bez
-wcześniejszego wczytania ich wszystkich (Ilość tych plików wynosi 29 tysięcy,
-rozmiar około 50 gigabajtów w formie skompresowanej).
+W tym celu musi on dynamicznie łączyć kolejne pliki w jeden strumień, bez
+wcześniejszego wczytania ich wszystkich\footnote{Ilość tych plików wynosi 29 tysięcy,
+rozmiar około 50 gigabajtów w formie skompresowanej} do pamięci.
 
 \subsection*{Opis problemu:}
 
@@ -126,11 +152,11 @@ Archiwa strony \texttt{modarchive.org} są udostępniane w następującej formie
             względu na format, artystę czy rok dodania. 
 
             Jakiekolwiek informacje zawarte w strukturze folderów mają być
-            ignorowane, strumieniujemy piosenki w losowy sposób.
+            ignorowane, odtwarzamy piosenki w prawdziwie losowy sposób.
 
             Odtwarzacz VLC
             może uzyskiwać dostęp po protokole SMB do serwera z plikami, lecz
-            nie odtwarza ich losowo w prosty sposób.
+            nie odtwarza ich losowo.
 
         \item Każda piosenka jest skompresowana jako archiwum \texttt{ZIP}.
 
@@ -190,11 +216,13 @@ składają się z paru części:
                     demuxera, który czyta zawartość pliku. Jeżeli dany plik
                     zawiera parę strumieni wideo lub audio, program wybiera
                     pierwszy strumień audio. Powinien wspierać większość
-                    standardów (pewnie nawet zasoby sieciowe, zależy od wersji
-                    biblioteki \texttt{libav}).
+                    formatów\footnote{Pewnie nawet zasoby sieciowe, zależy od wersji
+                    biblioteki \texttt{libav}.}, w tym na przykład
+                    \texttt{mp4}.
                 \item \texttt{<Decoder for \$codec>} - Stworzono obiekt dekodera
-                    kompresji, program \emph{powinien} wspierać wiele różnych
-                    kodeków, jednak standard mp3 generuje niepoprawny dźwięk.
+                    kompresji, program wspiera wiele różnych kodeków. Dokładna
+                    lista zależy od opcji użytych do skompilowania pakietu
+                    \texttt{org.bytedeco:ffmpeg-platform}.
                 \item \texttt{<Resampler from \$foo to \$bar>} - Stworzono
                     obiekt resamplera, który normalizuje częstotliwość
                     próbkowania oraz zapis bitowy.
@@ -273,7 +301,7 @@ być hostowane przez serwer HTTP, jako pliki statyczne. Programy takie jak
 \emph{VLC Media Player}, \emph{ffplay}, \emph{safari} czy przeglądarki
 internetowe na systemie android odtworzą je bez problemu, nawet z dysku. Dla
 przeglądarek na komputerach PC trzeba dostarczyć demuxer w
-\emph{javascript'cie}, co nie jest przedmiotem tego projektu.
+\emph{JavaScript'cie}, co nie jest przedmiotem tego projektu.
 
 
 \section{Zastosowane algorytmy:}
@@ -288,7 +316,7 @@ Ogólny schemat blokowy jest pokazany w załączniku \ref{rys:program}.
 
 \begin{figure}[p]
     \resizebox{.3\textwidth}{!}{%
-        \input{pipeline.tex}%
+        \input{pipeline.dot.tex}%
     }
     \centering
     \caption{Pipeline danych}
@@ -297,7 +325,7 @@ Ogólny schemat blokowy jest pokazany w załączniku \ref{rys:program}.
 
 \begin{figure}[p]
     \resizebox{.7\textwidth}{!}{%
-        \input{reader.tex}%
+        \input{reader.dot.tex}%
     }
     \centering
     \caption{Schemat blokowy działania klasy \texttt{ReaderAsyncFactory}}
@@ -306,12 +334,87 @@ Ogólny schemat blokowy jest pokazany w załączniku \ref{rys:program}.
 
 \begin{figure}[p]
     \resizebox{.54\textwidth}{!}{%
-        \input{program.tex}%
+        \input{program.dot.tex}%
     }
     \centering
     \caption{Ogólny schemat działania programu.}
     \label{rys:program}
 \end{figure}
+
+\subsection*{Opis poszczególnych klas:}
+
+\subsubsection{\texttt{App}}
+
+Klasa zawierająca główną logikę programu w metodzie \texttt{main}.
+
+\subsubsection{\texttt{Reader}}
+
+Klasa odpowiedzialna jest za: 
+\begin{itemize}
+    \item Otwieranie demuxera dla zadanego pliku. 
+    \item Wybieranie strumienia audio w pliku.
+    \item Zwracanie kolejnych pakietów skompresowanego strumienia.
+\end{itemize}
+
+Jest ona zrealizowana głównie jako obudowanie struktury \texttt{AVFormatContext}
+z biblioteki \texttt{libav}.
+
+\subsubsection{\texttt{ReaderAsyncFactory}}
+
+Klasa implementuje \texttt{Callable<Reader>}. Z tego powodu bardziej zachowuje
+się jako funkcja, której działanie znajduje się na diagramie w załączniku
+\ref{rys:reader}. Zrealizowana jest w ten sposób by ewentualny proces
+,,zgadywania'' czy dany plik czymś użytecznym nie wpływał na główny wątek.
+
+\subsubsection{\texttt{Decoder}}
+
+Klasa opakowuje obiekty klasy \texttt{Reader}, w celu zdekodowania
+informacji. Odpowiedzialna jest za: 
+\begin{itemize}
+    \item Stworzenie kontekstu kodeka \texttt{AVCodecContext}.
+    \item Otworzenie samego kodeka w bibliotece \texttt{libav}.
+    \item Zwracanie kolejnych zdekodowanych klatek.
+\end{itemize}
+
+\subsubsection{\texttt{Encoder}}
+
+Klasa zarządza procesem kodowania klatek. Odpowiedzialna jest za: 
+\begin{itemize}
+    \item Tworzenie kontekstu kodeka \texttt{AVCodecContext} z zadanymi
+        parametrami: 
+        \begin{itemize}
+            \item Rodzaj kodeka (używany jest tylko AAC)
+            \item Bitrate strumienia
+            \item Format bitowy próbek, który musi być wspierany przez kodek.
+            \item Częstotliwość próbkowania
+            \item Układ kanałów audio
+        \end{itemize}
+    \item Przekazywanie klatek do zakodowania do kodeka.
+    \item Odbieranie zakodowanych pakietów, oraz informowanie kiedy takowe się
+        już skończyły.
+\end{itemize}
+
+\subsubsection{\texttt{Resampler}}
+
+Klasa konwertuje różne parametry strumieni dekodowanych przez obiekty klasy
+\texttt{Decoder}, tak by mogły one dzielić jeden obiekt klasy \texttt{Encoder}.
+Odpowiada za: 
+\begin{itemize}
+    \item Inicjalizację kontekstu resamplera \texttt{SwrContext}, w oparciu o
+        parametry wejściowego oraz wyjściowego \texttt{AVCodecContext}.
+    \item Przepisywanie \texttt{pts}, \texttt{dts} oraz \texttt{pos} między klatkami.
+\end{itemize}
+
+\subsubsection{\texttt{Muxer}}
+
+Klasa odpowiedzialna jest za: 
+\begin{itemize}
+    \item Otwieranie muxera dla zadanego pliku. 
+    \item Tworzenie strumienia audio w oparciu o \texttt{AVCodecContext}
+        \texttt{Encoder}'a.
+    \item Zapisywanie kolejnych pakietów w czasie rzeczywistym.
+\end{itemize}
+
 
 \section{Testy na poprawność działania programu:}
 
@@ -329,10 +432,10 @@ może wystąpić konieczność przewinięcia do przodu strumienia, bo starsze cz
 mogą już nie być dostępne. Wynika to z niejasności dokumentacji \texttt{libav}
 na temat tego, w jakim formacie są dane synchronizujące zawarte w klatkach
 strumienia. Przykładowo pliki w formacie \texttt{mp3} oraz \texttt{aac}
-posiadają kompletnie różne wartości. 
+mają kompletnie różne wartości. 
 
-Jednym z możliwych rozwiązań tego problemu było by manualne obliczanie długości
-poszczególnych klatek w resamplerze, w oparciu o ilość próbek (sampli),
+Jednym z możliwych rozwiązań tego problemu byłoby manualne obliczanie długości
+poszczególnych klatek w resamplerze, na podstawie ilość próbek (sampli),
 częstotliwość próbkowania oraz ilość kanałów.
 
 Innym błędem, raczej związanym z poprzednim\footnote{lub flag kompilacyjnych
@@ -348,9 +451,16 @@ Po stworzeniu tego programu lepiej rozumiem architekturę biblioteki
 \texttt{libav}, gdyż wcześniej wykorzystywałem ją tylko do dekodowania audio w
 poprzednim projekcie z
 \href{https://github.com/HakierGrzonzo/GrzesSFMLlib}{programowania II.} w języku
-C++ oraz w projekcie komercyjnym dla Gliwickiej firmy \emph{APA
-Group\footnote{Plakat rekrutacyjny ,,Pracuj w Czarnym Domu'' wisi na czwartym
-piętrze wydziału Matematyki Stosowanej obok schodów.}} w języku
-python.
+C++ oraz w projekcie komercyjnym jako skrypty wykorzystujące frontend
+\texttt{ffmpeg}. 
+
+Program można by było wzbogacić o opcje do konfiguracji formatu wyjściowego, co
+by sprawiło że mógłby być on uniwersalnym \emph{klejem} do plików audio.
+Dodatkowo rozszerzenie go o strumienie video oraz napisów mogło by powiększyć
+możliwości klejenia. Takie zastosowanie wymagałoby zastosowania wsparcia
+akceleracji sprzętowej, która wymagała by testowania do kartach graficznych
+wielu producentów\footnote{Firma Nvidia nie pozwala na transkodowanie więcej niż
+trzech strumieni na kartach konsumenckich, wymagana jest karta z rodziny
+co najmniej Quadro.}. 
 
 \end{document}
