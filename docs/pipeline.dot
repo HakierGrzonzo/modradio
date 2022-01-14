@@ -1,15 +1,20 @@
 digraph G {
+    node    [
+        margin=".4,.2"
+    ]
     ReaderAsyncFactory;
     Reader;
     Decoder;
     Resampler;
     Encoder;
     Muxer;
+    HLS;
 
     stdin -> ReaderAsyncFactory;
     ReaderAsyncFactory -> Reader[label="Nazwa\npliku"];
     Reader -> Decoder[label="Skompresowany\nstrumień"]
-    Decoder -> Resampler[label="Dane PCM"]
-    Resampler -> Encoder[label="Dane PCM"]
+    Decoder -> Resampler[label=" Dane PCM"]
+    Resampler -> Encoder[label=" Dane PCM"]
     Encoder -> Muxer[label="Skompresowany\nstrumień"]
+    Muxer -> HLS [label=" Zapisywanie danych"]
 }

@@ -162,6 +162,13 @@ dany plik.
 Program stara się otwierać dwa pliki naraz. Plik, który jest właśnie
 strumieniowany, oraz plik, który jest następny w kolejce.
 
+Program wspiera wiele formatów wejściowych, ich dokładna lista zależy od flag
+użytych do kompilacji biblioteki ffmpeg. Jeżeli plik wejściowy zawiera więcej
+niż jeden strumień\footnote{Na przykład plik wideo będzie zawierał zwykle jedną
+ścieżkę wideo, jedną lub więcej audio oraz nawet kilkanaście ścieżek napisów,
+czasami nawet miniaturkę jako jednoklatkowy strumień MJPEG.}, to program wybiera
+pierwszy strumień audio.
+
 \section{Opis otrzymanych rezultatów}
 
 \subsection*{Wydruk z programu}
@@ -169,7 +176,8 @@ strumieniowany, oraz plik, który jest następny w kolejce.
 Program wypisuje do konsoli logi diagnostyczne, za przechowywanie ich w plikach
 odpowiada \textbf{systemd} lub \textbf{docker}.
 
-Logi w omawianym przykładzie składają się z paru części:
+Przykładowe logi znajdują się na załączniku \ref{lst:logs}. Logi w załączniku 
+składają się z paru części:
 
 \begin{itemize}
         \item Logi ze znakami < oraz >, - Logi informujące jakie obiekty są
@@ -211,7 +219,6 @@ Logi w omawianym przykładzie składają się z paru części:
             \texttt{./feeder.sh}.
 \end{itemize}
 
-Przykładowe logi znajdują się na załączniku \ref{lst:logs}.
 
 \begin{figure}[h]
 \begin{lstlisting}[frame=LB,basicstyle=\ttfamily\scriptsize, numbers=left]
@@ -274,7 +281,10 @@ przeglądarek na komputerach PC trzeba dostarczyć demuxer w
 Obieg danych jest przedstawiony na załączniku \ref{rys:pipeline}.
 
 W programie został zastosowany mechanizm asynchroniczności poprzez klasę
-standardową \texttt{Future} oraz \texttt{ReaderAsyncFactory}.
+standardową \texttt{Future} oraz \texttt{ReaderAsyncFactory}, proces ten jest
+pokazany w załączniku \ref{rys:reader}. 
+
+Ogólny schemat blokowy jest pokazany w załączniku \ref{rys:program}.
 
 \begin{figure}[p]
     \resizebox{.3\textwidth}{!}{%
@@ -311,6 +321,28 @@ standardowej języka \emph{Python}, poprzez komendę \texttt{python -m
 http.server}.
 
 \section{Wnioski:}
+
+\subsection{Znane błędy}
+
+Program generuje strumień w tempie leciutko zawyżonym. Podczas dłuższego odsłuch
+może wystąpić konieczność przewinięcia do przodu strumienia, bo starsze części
+mogą już nie być dostępne. Wynika to z niejasności dokumentacji \texttt{libav}
+na temat tego, w jakim formacie są dane synchronizujące zawarte w klatkach
+strumienia. Przykładowo pliki w formacie \texttt{mp3} oraz \texttt{aac}
+posiadają kompletnie różne wartości. 
+
+Jednym z możliwych rozwiązań tego problemu było by manualne obliczanie długości
+poszczególnych klatek w resamplerze, w oparciu o ilość próbek (sampli),
+częstotliwość próbkowania oraz ilość kanałów.
+
+Innym błędem, raczej związanym z poprzednim\footnote{lub flag kompilacyjnych
+związanych z \texttt{libmp3lame} w bibliotece \texttt{libav}, kwestie patentowe
+komplikują sprawę wsparcia tego kodowania.}, jest błąd przy odczycie plików w
+formacie \texttt{mp3}, program otwiera je poprawnie, resampluje z 48000hz do
+41000hz, koduje do mp3, ale efekt wyjściowy nie przypomina zbytnio pliku
+wejściowego.
+
+\subsection{Inne:}
 
 Po stworzeniu tego programu lepiej rozumiem architekturę biblioteki
 \texttt{libav}, gdyż wcześniej wykorzystywałem ją tylko do dekodowania audio w

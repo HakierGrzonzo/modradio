@@ -17,19 +17,24 @@ digraph G {
     ]
     reader2 -> reader3;
     reader4 [
-        texlbl="Spróbuj zczytać linjkę z stdin do zmiennej \texttt{filepath}"
+        texlbl="Zczytaj linjkę z stdin do zmiennej \texttt{filepath}"
         shape=parallelogram
     ]
+    readerEOF [
+        texlbl="EOFexception?"
+        shape=diamond
+    ]
+        reader4 -> readerEOF;
     exception [
         texlbl="Zwróć wyjątek"
     ]
-    reader4 -> exception [texlbl="Koniec stdin"]
+    readerEOF -> exception [texlbl="Koniec stdin"]
     reader3 -> reader4 [texlbl="true"]
     reader5 [
         texlbl="Spróbuj odczytać plik w ścieżce \texttt{filepath}"
         shape=parallelogram
     ]
-    reader4 -> reader5;
+    readerEOF -> reader5 [label="Sukces"];
     reader5 -> reader3;
     reader6 [
         texlbl="Zwróć \texttt{reader}"
