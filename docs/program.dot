@@ -32,7 +32,7 @@ digraph G {
         label="Inicjalizacja dekodera dla obiektu \texttt{reader}"
         shape=parallelogram
     ]
-        try_get_reader -> init_decoder [label="tak"]
+        try_get_reader -> init_decoder [label="Tak"]
     init_resampler [
         label="Inicjalizacja resamplera dla obiektu dekodera"
         shape=parallelogram

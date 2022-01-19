@@ -1,5 +1,6 @@
 package site.grzegorzkoperwas.modradio;
 
+import org.bytedeco.javacpp.*;
 import org.bytedeco.ffmpeg.avcodec.*;
 import org.bytedeco.ffmpeg.avutil.*;
 import static org.bytedeco.ffmpeg.global.avcodec.*;
@@ -10,9 +11,34 @@ import java.util.concurrent.*;
 
 public class App 
 {
+    public static String ffmpegFlags() {
+        BytePointer configptr = avcodec_configuration();
+        String res = new String();
+        res += '\t';
+        long i = 0;
+        int line_length = 0;
+        while (configptr.get(i) != 0) {
+            char c = (char) configptr.get(i);
+            i++;
+            if (c == ' ') {
+                if (line_length > 70) {
+                    res += "\n\t";
+                    line_length = 0;
+                } else  {
+                    res += ' ';
+                    line_length ++;
+                }
+                continue;
+            }
+            res += c;
+            line_length++;
+        }
+        return res;
+    }
     public static void main( String[] args )
     {
         Scanner stdin = new Scanner(System.in);
+        System.out.println("Using ffmpeg compiled with the following flags:\n" + ffmpegFlags());
         ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
         Future<Reader> nextReader = executor.submit(new ReaderAsyncFactory(stdin));
         Encoder encoder = new Encoder(

@@ -65,19 +65,30 @@
 
 \renewcommand{\maketitle}{
     \begin{titlepage}
-        \vspace*{4cm}
+        \vspace*{2cm}
+        
+        \hspace{-3.4cm}\begin{minipage}{13cm}
+            \hrule
 
-        \Large{\textbf{\thetitle}}
+            \vspace*{10pt}
 
-        \vspace*{1cm}
+            \hspace{15mm}\Large{\textbf{\thetitle}}
 
-        \large{\theauthor}
+            \vspace*{5mm}
+
+            \hspace{15mm}\large{\theauthor}
+
+            \vspace*{10pt}
+
+            \hrule
+        \end{minipage}
+
 
         \vfill
     
         \begin{center}
             \footnotesize 
-            Politechnika Śląska 
+            Wydział Matematyki Stosowanej, Politechnika Śląska 
             
             \vspace*{1em}
 
@@ -177,6 +188,33 @@ Zatem program musi:
             \emph{Docker Swarm}, brak GUI itp.
 \end{enumerate}
 
+\section*{Ważne rzeczy na które warto zwrócić uwagę:}
+
+\begin{enumerate}
+    \item Działanie programu było weryfikowane w środowisku: 
+        \begin{itemize}
+            \item System zgodny z \texttt{POSIX}, tutaj \texttt{Arch Linux}
+            \item \texttt{OpenJDK Runtime Environment (build 11.0.13+8)}
+            \item \texttt{Apache Maven 3.8.4}
+        \end{itemize}
+    \item Program używa natywnych bibliotek, przez to lista wspieranych platform
+        ogranicza się do poniższych kombinacji architektur i systemów
+        operacyjnych: 
+        \begin{itemize}
+            \item Android (arm, arm64, x86, x86\_64)
+            \item iOS (arm, x86\_64\footnote{Używane dla emulatora systemu iOS,
+                same urządzenia wykorzystują tylko arm})
+            \item linux (armhf, arm64, ppc64le, x86, x86\_64)
+            \item macOS (arm64, x86\_64)
+            \item Windows (x86, x86\_64)
+        \end{itemize}
+    \item Dokumentacja jest kompilowana korzystając z narzędzia
+        \texttt{xelatex}, jednak diagramy są generowane skryptem
+        \texttt{dot2tex}. Plik \texttt{./Makefile} zawiera reguły dla programu
+        \texttt{make}, które kompilują dokumentację po wydaniu polecenia
+        \texttt{make docs/doc.pdf}.
+\end{enumerate}
+
 \section{Opis pobieranych danych przez program:}
 
 Program pobiera przez standardowe wejście ścieżki do kolejnych plików audio.
@@ -248,7 +286,7 @@ składają się z paru części:
 \end{itemize}
 
 
-\begin{figure}[h]
+\begin{figure}[t]
 \begin{lstlisting}[frame=LB,basicstyle=\ttfamily\scriptsize, numbers=left]
 [mpegts @ 0x7f0600355480] frame size not set
 <Encoder for aac>
@@ -323,8 +361,8 @@ Ogólny schemat blokowy jest pokazany w załączniku \ref{rys:program}.
     \label{rys:pipeline}
 \end{figure}
 
-\begin{figure}[p]
-    \resizebox{.7\textwidth}{!}{%
+\begin{figure}[t]
+    \resizebox{.5\textwidth}{!}{%
         \input{reader.dot.tex}%
     }
     \centering
@@ -425,7 +463,7 @@ http.server}.
 
 \section{Wnioski:}
 
-\subsection{Znane błędy}
+\subsection*{Znane błędy}
 
 Program generuje strumień w tempie leciutko zawyżonym. Podczas dłuższego odsłuch
 może wystąpić konieczność przewinięcia do przodu strumienia, bo starsze części
@@ -445,7 +483,7 @@ formacie \texttt{mp3}, program otwiera je poprawnie, resampluje z 48000hz do
 41000hz, koduje do mp3, ale efekt wyjściowy nie przypomina zbytnio pliku
 wejściowego.
 
-\subsection{Inne:}
+\subsection*{Inne:}
 
 Po stworzeniu tego programu lepiej rozumiem architekturę biblioteki
 \texttt{libav}, gdyż wcześniej wykorzystywałem ją tylko do dekodowania audio w

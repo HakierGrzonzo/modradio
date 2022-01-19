@@ -21,7 +21,8 @@ digraph G {
         shape=parallelogram
     ]
     readerEOF [
-        texlbl="EOFexception?"
+        texlbl="NoSuchEmementException?"
+        lblstyle="text width=20em,align=center"
         shape=diamond
     ]
         reader4 -> readerEOF;
