@@ -172,9 +172,9 @@ Archiwa strony \texttt{modarchive.org} są udostępniane w następującej formie
         \item Każda piosenka jest skompresowana jako archiwum \texttt{ZIP}.
 
         \item Piosenki są przechowywane jako \emph{moduły trackerów}, gdzie
-            zamiast danych \texttt{PCM} przechowywane są w formie sampli i
-            informacji jak je odtwarzać. Wynika to z architektury komputerów
-            \emph{Amiga}, gdzie ten rodzaj muzyki powstał.
+            zamiast danych \texttt{PCM} przechowywane są w formie pojedynczych
+            sampli oraz informacji jak je odtwarzać. Wynika to z architektury
+            komputerów \emph{Amiga}, gdzie ten rodzaj muzyki powstał.
 \end{enumerate}
 
 Zatem program musi:
@@ -211,8 +211,15 @@ Zatem program musi:
     \item Dokumentacja jest kompilowana korzystając z narzędzia
         \texttt{xelatex}, jednak diagramy są generowane skryptem
         \texttt{dot2tex}. Plik \texttt{./Makefile} zawiera reguły dla programu
-        \texttt{make}, które kompilują dokumentację po wydaniu polecenia
-        \texttt{make docs/doc.pdf}.
+        \texttt{make}, które kompilują dokumentację po wydaniu polecenia:
+        \begin{center}
+            \texttt{make docs/doc.pdf}.
+        \end{center}
+    \item Program budujemy do postaci wykonywalnego pliku \texttt{.jar}
+        poleceniem:
+        \begin{center}
+            \texttt{mvn assembly:assembly}
+        \end{center}
 \end{enumerate}
 
 \section{Opis pobieranych danych przez program:}
@@ -244,6 +251,8 @@ Przykładowe logi znajdują się na załączniku \ref{lst:logs}. Logi w załącz
 składają się z paru części:
 
 \begin{itemize}
+        \item Na samym początku, po uruchomieniu, program wyświetla informacje z
+            jakimi flagami została skompilowana biblioteka \texttt{libav}
         \item Logi ze znakami < oraz >, - Logi informujące jakie obiekty są
             tworzone przez program. Przykładowo:
             \begin{itemize}
@@ -288,6 +297,15 @@ składają się z paru części:
 
 \begin{figure}[t]
 \begin{lstlisting}[frame=LB,basicstyle=\ttfamily\scriptsize, numbers=left]
+Using ffmpeg compiled with the following flags:
+	--prefix=.. --disable-iconv --disable-opencl --disable-sdl2 --disable-bzlib
+	--disable-lzma --disable-linux-perf --enable-shared --enable-version3 --enable-runtime-cpudetect
+	--enable-zlib --enable-libmp3lame --enable-libspeex --enable-libopencore-amrnb
+	--enable-libopencore-amrwb --enable-libvo-amrwbenc --enable-openssl --enable-libopenh264
+	--enable-libvpx --enable-libfreetype --enable-libopus --enable-libxml2 --enable-libsrt
+	--enable-cuda --enable-cuvid --enable-nvenc --enable-pthreads --enable-libxcb
+	--cc='gcc -m64' --extra-cflags='-I../include/ -I../include/libxml2' --extra-ldflags=-L../lib/
+	--extra-libs='-lstdc++ -lpthread -ldl -lz -lm '
 [mpegts @ 0x7f0600355480] frame size not set
 <Encoder for aac>
 extracted /tmp/modfiles/lazertrack_heaven_2.mod
