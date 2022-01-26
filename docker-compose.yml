@@ -1,0 +1,10 @@
+version: "3.2"
+
+services:
+  modradio:
+    build:
+      dockerfile: ./dockerfile
+      context: .
+    volumes:
+      - "./in:/infiles"
+      - "./out:/app"
